@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%232f3b45%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2223%22%20r%3D%227%22%20fill%3D%22%235ec2e8%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2223%22%20r%3D%227%22%20fill%3D%22%237cc95a%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2223%22%20r%3D%227%22%20fill%3D%22%23ffb928%22%2F%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2242%22%20r%3D%227%22%20fill%3D%22%23f2a33c%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2242%22%20r%3D%227%22%20fill%3D%22%23e86a9a%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2242%22%20r%3D%227%22%20fill%3D%22%23b07de8%22%2F%3E%3C%2Fsvg%3E">
+<title>桜泉祭2026 ミニゲームアーケード（6本）</title>
+<link rel="stylesheet" href="assets/css/arcade.css">
+</head>
+<body>
+<div id="viewport">
+  <div id="stage">
+    <canvas id="game-canvas" width="1920" height="1080"></canvas>
+
+    <!-- ========== ゲーム選択画面 ========== -->
+    <section id="screen-menu" class="screen" hidden>
+      <header class="menu-head">
+        <div class="menu-badge">桜泉祭 2026 ・ 情報処理研究会</div>
+        <h1 class="menu-title"><span class="t1">ミニゲーム</span><span class="t2">アーケード</span></h1>
+        <p class="menu-catch">はじめてでも、いっしょに楽しい。</p>
+      </header>
+      <div id="menu-mode" class="menu-mode" hidden></div>
+      <div id="menu-cards" class="menu-cards"></div>
+      <footer class="menu-foot">
+        <span><b class="key">クリック</b> または <b class="key">1</b>〜<b class="key">6</b> キーで えらぶ</span>
+        <button class="btn btn-ghost menu-rank" id="menu-rank" type="button">🏆 ランキングを みる <small>(T)</small></button>
+        <span><b class="key">F</b> ぜんがめん</span>
+      </footer>
+    </section>
+
+    <!-- ========== あそびかた画面 ========== -->
+    <section id="screen-intro" class="screen" hidden>
+      <div class="intro-panel">
+        <div class="intro-tags" id="intro-tags"></div>
+        <h2 class="intro-title" id="intro-title"></h2>
+        <p class="intro-catch" id="intro-catch"></p>
+        <div class="intro-howto" id="intro-howto"></div>
+        <div class="intro-best" id="intro-best"></div>
+        <div class="intro-buttons" id="intro-buttons"></div>
+        <div class="intro-desc" id="intro-desc"></div>
+        <div class="intro-foot">
+          <button class="btn btn-ghost intro-back" id="intro-back" type="button">← ほかのゲーム <small>(Esc)</small></button>
+          <button class="btn btn-ghost intro-rank" id="intro-rank" type="button" hidden>ランキングを みる</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 結果画面 ========== -->
+    <section id="screen-result" class="screen" hidden>
+      <div class="result-panel">
+        <div class="result-ribbon" id="result-ribbon">けっか</div>
+        <div class="result-headline" id="result-headline"></div>
+        <div class="result-big" id="result-big"></div>
+        <div class="result-record" id="result-record" hidden>しんきろく！</div>
+        <div class="result-sub" id="result-sub"></div>
+        <div class="result-best" id="result-best"></div>
+        <div class="result-rank" id="result-rank" hidden></div>
+        <div class="result-ask" id="result-ask" hidden>
+          <div class="result-ask-text" id="result-ask-text">ランキングに のせる？</div>
+          <div class="result-ask-buttons">
+            <button class="btn btn-main" id="result-reg-yes" type="button">はい！ のせる</button>
+            <button class="btn btn-sub" id="result-reg-no" type="button">のせない</button>
+          </div>
+        </div>
+        <div class="result-buttons">
+          <button class="btn btn-main" id="result-retry" type="button">もう一回 <small>(Enter)</small></button>
+          <button class="btn btn-sub" id="result-rankview" type="button" hidden>ランキング <small>(T)</small></button>
+          <button class="btn btn-sub" id="result-menu" type="button">ほかのゲーム <small>(Esc)</small></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== ランキング画面 ========== -->
+    <section id="screen-rank" class="screen" hidden>
+      <div class="rank-panel">
+        <div class="rank-crown">🏆</div>
+        <h2 class="rank-head" id="rank-head">ランキング</h2>
+        <div class="rank-sub" id="rank-sub">このパソコンで あそんだ きろくです</div>
+        <div class="rank-tabs rank-tabs-game" id="rank-tabs-game"></div>
+        <div class="rank-tabs" id="rank-tabs-board"></div>
+        <div class="rank-tabs rank-tabs-day" id="rank-tabs-day"></div>
+        <div class="rank-host" id="rank-host" hidden>
+          <div class="rank-host-msg" id="rank-host-msg"></div>
+          <div class="rank-host-btns">
+            <button class="btn btn-sub rank-host-btn danger" id="rank-host-clear" type="button">この一覧を ぜんぶ消す</button>
+            <button class="btn btn-sub rank-host-btn" id="rank-host-undo" type="button">ひとつ前に もどす</button>
+            <button class="btn btn-sub rank-host-btn" id="rank-host-exit" type="button">ホストモード おわる</button>
+          </div>
+        </div>
+        <div class="rank-listwrap">
+          <ol class="rank-list" id="rank-list"></ol>
+          <div class="rank-empty" id="rank-empty" hidden>まだ きろくが ないよ。さいしょの 1人に なろう！</div>
+        </div>
+        <div class="rank-buttons">
+          <button class="btn btn-main" id="rank-close" type="button">とじる <small>(Esc)</small></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== スタッフ設定画面 ========== -->
+    <section id="screen-staff" class="screen" hidden>
+      <div class="staff-panel">
+        <h2 class="staff-head">スタッフ設定<span class="staff-sub">（来場者向けの画面ではありません）</span></h2>
+        <div class="staff-status" id="staff-status"></div>
+
+        <div class="staff-block">
+          <div class="staff-label">きょうの あつかい（ランキングの保存先）</div>
+          <div class="staff-row" id="staff-days"></div>
+        </div>
+
+        <div class="staff-block staff-legacy-block">
+          <div class="staff-label">前の版から ランキングを 引きつぐ（R4）</div>
+          <div class="staff-legacy-info" id="staff-legacy-info"></div>
+          <div class="staff-row">
+            <button class="btn btn-sub staff-btn" id="staff-legacy" type="button">前の版から 引きつぐ（足す）</button>
+            <button class="btn btn-sub staff-btn" id="staff-file" type="button">ファイルから 読みこむ（足す）</button>
+            <input type="file" id="staff-file-input" accept=".json,application/json,text/plain" hidden>
+          </div>
+          <div class="staff-legacy-info">ホストモード：ゲームの ランキング画面で <b>Shift + Delete</b>（来場者の見ている画面のまま 1件ずつ消せます）</div>
+        </div>
+
+        <div class="staff-block">
+          <div class="staff-label">記録の一覧（✕ で1件ずつ消せます）</div>
+          <div class="staff-boards" id="staff-boards"></div>
+        </div>
+
+        <div class="staff-block">
+          <div class="staff-label">バックアップ（JSON）</div>
+          <textarea class="staff-json" id="staff-json" spellcheck="false" placeholder="「書き出す」を押すと ここに出ます。コピーしてメモ帳などに保存してください。&#10;復元するときは ここに貼りつけて「読みこむ」。"></textarea>
+          <div class="staff-row">
+            <button class="btn btn-sub staff-btn" id="staff-export" type="button">書き出す</button>
+            <button class="btn btn-sub staff-btn" id="staff-copy" type="button">コピー</button>
+            <button class="btn btn-sub staff-btn" id="staff-save" type="button">ファイルに保存</button>
+            <button class="btn btn-sub staff-btn" id="staff-import" type="button">読みこむ（足す）</button>
+            <button class="btn btn-sub staff-btn" id="staff-replace" type="button">読みこむ（置きかえ）</button>
+          </div>
+        </div>
+
+        <div class="staff-block">
+          <div class="staff-label">きけんな操作</div>
+          <div class="staff-row">
+            <button class="btn btn-sub staff-btn" id="staff-undo" type="button">ひとつ前に もどす</button>
+            <button class="btn btn-sub staff-btn staff-danger" id="staff-cleartest" type="button">れんしゅうの記録だけ消す</button>
+            <button class="btn btn-sub staff-btn staff-danger" id="staff-clearall" type="button">ぜんぶ消す</button>
+          </div>
+          <div class="staff-note" id="staff-note"></div>
+        </div>
+
+        <div class="staff-row staff-foot">
+          <button class="btn btn-main" id="staff-close" type="button">とじる <small>(Esc)</small></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== ニックネーム入力 ========== -->
+    <div id="overlay-name" class="overlay" hidden>
+      <div class="dialog dialog-name">
+        <div class="name-title" id="name-title">ランキングに のせるよ！</div>
+        <div class="name-note" id="name-note">ニックネームを 入れてね（ほんみょうは 入れないでね・8もじまで）</div>
+        <div class="name-box"><span class="name-value" id="name-value"></span><span class="name-caret"></span></div>
+        <div class="name-tabs" id="name-tabs"></div>
+        <div class="name-kbd" id="name-kbd"></div>
+        <div class="dialog-buttons">
+          <button class="btn btn-main" id="name-ok" type="button">とうろく！</button>
+          <button class="btn btn-sub" id="name-cancel" type="button">やめる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 一時停止 ========== -->
+    <div id="overlay-pause" class="overlay" hidden>
+      <div class="dialog">
+        <div class="dialog-icon">⏸</div>
+        <div class="dialog-title">ひと休み中</div>
+        <div class="dialog-text">クリック または スペースで つづける</div>
+        <div class="dialog-buttons">
+          <button class="btn btn-main" id="pause-resume" type="button">つづける</button>
+          <button class="btn btn-sub" id="pause-menu" type="button">メニューへ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 確認ダイアログ ========== -->
+    <div id="overlay-confirm" class="overlay" hidden>
+      <div class="dialog">
+        <div class="dialog-title" id="confirm-title"></div>
+        <div class="dialog-text" id="confirm-text"></div>
+        <div class="dialog-buttons">
+          <button class="btn btn-main" id="confirm-no" type="button">つづける</button>
+          <button class="btn btn-sub" id="confirm-yes" type="button">はい</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 再開カウント ========== -->
+    <div id="overlay-resume" class="overlay overlay-clear" hidden>
+      <div class="resume-num" id="resume-num">3</div>
+    </div>
+
+    <!-- ========== 右上ボタン ========== -->
+    <div id="topbar">
+      <button class="tb" id="tb-menu" type="button" title="メニューへ (Esc)" hidden>
+        <svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5M6.5 9.5V20h11V9.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tb" id="tb-bgm" type="button" title="BGM オン/オフ">
+        <svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.8" fill="currentColor"/><circle cx="17.5" cy="16" r="2.8" fill="currentColor"/><path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tb" id="tb-sfx" type="button" title="こうかおん オン/オフ (M)">
+        <svg viewBox="0 0 24 24"><path d="M4 9.5h4l5-4.5v14l-5-4.5H4z" fill="currentColor"/><path class="wave" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tb" id="tb-full" type="button" title="ぜんがめん (F)">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+  </div>
+</div>
+
+<noscript><div class="noscript">JavaScript を有効にしてください（Edge / Chrome でひらいてください）</div></noscript>
+
+<script src="assets/js/audio.js"></script>
+<script src="assets/js/ranking.js"></script>
+<script src="assets/js/engine.js"></script>
+<script src="games/hockey/game.js"></script>
+<script src="games/mole/game.js"></script>
+<script src="games/sub/game.js"></script>
+<script src="games/snack/game.js"></script>
+<script src="games/balloon/game.js"></script>
+<script src="games/parade/game.js"></script>
+<script>Arcade.boot();</script>
+
+<style>
+  #webnote { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999;
+    background: #2f3b45; color: #fff; padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    font: 15px/1.6 "BIZ UDPGothic","Yu Gothic UI",Meiryo,sans-serif; display: none; }
+  #webnote b { color: #ffd77a; }
+  #webnote .x { position: absolute; top: 8px; right: 12px; background: none; border: 0;
+    color: #fff; font-size: 22px; line-height: 1; padding: 4px 8px; cursor: pointer; }
+  #webnote .r { display: inline-block; margin-top: 6px; color: #bfe6ff; }
+</style>
+<div id="webnote" role="note">
+  <button class="x" type="button" aria-label="とじる">&times;</button>
+  この6本は <b>パソコン（キーボードとマウス）向け</b>に作っています。<br>
+  スマホ・タブレットでは <b>もぐらたたき／あわあわ潜水艇／おやつをパクッ！／なんびきパレード</b> の
+  4本が タップで遊べます。<b>ドタバタホッケー</b>と<b>ふわふわ！風船バレー</b>は キーボードが必要です。
+  <span class="r">※ 横向きにすると 画面が大きくなります</span>
+</div>
+<script>
+(function () {
+  var el = document.getElementById('webnote');
+  if (!el) return;
+  var touch = false;
+  try { touch = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0; } catch (e) { touch = false; }
+  var narrow = window.innerWidth < 1100;
+  var hidden = false;
+  try { hidden = localStorage.getItem('ousenArcadeWeb.webnote') === 'off'; } catch (e) { hidden = false; }
+  if ((touch || narrow) && !hidden) el.style.display = 'block';
+  el.querySelector('.x').addEventListener('click', function () {
+    el.style.display = 'none';
+    try { localStorage.setItem('ousenArcadeWeb.webnote', 'off'); } catch (e) { /* 保存できなくてもよい */ }
+  });
+})();
+</script>
+</body>
+</html>

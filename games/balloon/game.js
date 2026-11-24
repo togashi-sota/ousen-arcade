@@ -2285,7 +2285,7 @@
       g.fillStyle = 'rgba(16,30,44,0.62)';
       g.fillRect(0, 0, W, H);
 
-      A.text(g, 'とくべつな 風船が 6しゅるい！', W / 2, 96,
+      A.text(g, '風船が 6しゅるい！ とくべつなのは 5つ', W / 2, 96,
         { size: 66, color: '#ffffff', stroke: '#2a93bd', strokeWidth: 18 });
       A.text(g, 'かたちと もようで 見わけよう', W / 2, 160,
         { size: 34, color: '#ffe9a8', stroke: 'rgba(20,40,56,0.9)', strokeWidth: 8 });
